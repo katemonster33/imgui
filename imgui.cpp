@@ -5590,7 +5590,7 @@ static ImVec2 CalcWindowAutoFitSize(ImGuiWindow* window, const ImVec2& size_cont
     if (window->Flags & ImGuiWindowFlags_Tooltip)
     {
         // Tooltip always resize
-        return size_desired;
+        return size_desired + ImVec2(1.5f, 0.0f);
     }
     else
     {

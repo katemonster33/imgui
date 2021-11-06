@@ -1839,9 +1839,9 @@ void ImGui::TableEndRow(ImGuiTable* table)
             ImRect row_rect(table->WorkRect.Min.x, bg_y1, table->WorkRect.Max.x, bg_y2);
             row_rect.ClipWith(table->BgClipRect);
             if (bg_col0 != 0 && row_rect.Min.y < row_rect.Max.y)
-                window->DrawList->AddRectFilled(row_rect.Min, row_rect.Max, bg_col0);
+                window->DrawList->AddRectFilled(row_rect.Min, ImVec2(row_rect.Max.x, row_rect.Min.y), bg_col0);
             if (bg_col1 != 0 && row_rect.Min.y < row_rect.Max.y)
-                window->DrawList->AddRectFilled(row_rect.Min, row_rect.Max, bg_col1);
+                window->DrawList->AddRectFilled(row_rect.Min, ImVec2(row_rect.Max.x, row_rect.Min.y), bg_col1);
         }
 
         // Draw cell background color
@@ -1857,17 +1857,17 @@ void ImGui::TableEndRow(ImGuiTable* table)
                 cell_bg_rect.ClipWith(table->BgClipRect);
                 cell_bg_rect.Min.x = ImMax(cell_bg_rect.Min.x, column->ClipRect.Min.x);     // So that first column after frozen one gets clipped when scrolling
                 cell_bg_rect.Max.x = ImMin(cell_bg_rect.Max.x, column->MaxX);
-                window->DrawList->AddRectFilled(cell_bg_rect.Min, cell_bg_rect.Max, cell_data->BgColor);
+                window->DrawList->AddRectFilled(cell_bg_rect.Min, ImVec2(cell_bg_rect.Max.x, cell_bg_rect.Min.y), cell_data->BgColor);
             }
         }
 
         // Draw top border
-        if (border_col && bg_y1 >= table->BgClipRect.Min.y && bg_y1 < table->BgClipRect.Max.y)
-            window->DrawList->AddLine(ImVec2(table->BorderX1, bg_y1), ImVec2(table->BorderX2, bg_y1), border_col, border_size);
+        //if (border_col && bg_y1 >= table->BgClipRect.Min.y && bg_y1 < table->BgClipRect.Max.y)
+        //    window->DrawList->AddLine(ImVec2(table->BorderX1, bg_y1), ImVec2(table->BorderX2, bg_y1), border_col, border_size);
 
         // Draw bottom border at the row unfreezing mark (always strong)
-        if (draw_strong_bottom_border && bg_y2 >= table->BgClipRect.Min.y && bg_y2 < table->BgClipRect.Max.y)
-            window->DrawList->AddLine(ImVec2(table->BorderX1, bg_y2), ImVec2(table->BorderX2, bg_y2), table->BorderColorStrong, border_size);
+        //if (draw_strong_bottom_border && bg_y2 >= table->BgClipRect.Min.y && bg_y2 < table->BgClipRect.Max.y)
+        //    window->DrawList->AddLine(ImVec2(table->BorderX1, bg_y2), ImVec2(table->BorderX2, bg_y2), table->BorderColorStrong, border_size);
     }
 
     // End frozen rows (when we are past the last frozen row line, teleport cursor and alter clipping rectangle)
@@ -2595,8 +2595,12 @@ void ImGui::TableDrawBorders(ImGuiTable* table)
                 col = (table->Flags & (ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_NoBordersInBodyUntilResize)) ? table->BorderColorStrong : table->BorderColorLight;
             }
 
-            if (draw_y2 > draw_y1)
-                inner_drawlist->AddLine(ImVec2(column->MaxX, draw_y1), ImVec2(column->MaxX, draw_y2), col, border_size);
+            if (draw_y2 > draw_y1) {
+                //inner_drawlist->AddLine(ImVec2(column->MaxX, draw_y1), ImVec2(column->MaxX, draw_y2 - 1.0f), col, 0.1f);
+                for (int y = draw_y1; y < draw_y2; ++y) {
+                    inner_drawlist->AddText(ImVec2(column->MaxX - 0.1f, y), col, "|");
+                }
+            }
         }
     }
 
@@ -2613,20 +2617,27 @@ void ImGui::TableDrawBorders(ImGuiTable* table)
         const ImU32 outer_col = table->BorderColorStrong;
         if ((table->Flags & ImGuiTableFlags_BordersOuter) == ImGuiTableFlags_BordersOuter)
         {
-            inner_drawlist->AddRect(outer_border.Min, outer_border.Max, outer_col, 0.0f, 0, border_size);
+            for (int y = outer_border.Min.y; y < outer_border.Max.y; ++y) {
+                inner_drawlist->AddText(ImVec2(outer_border.Min.x, y), outer_col, "|");
+                inner_drawlist->AddText(ImVec2(outer_border.Max.x - 2.0f, y), outer_col, "|");
+            }
         }
         else if (table->Flags & ImGuiTableFlags_BordersOuterV)
         {
-            inner_drawlist->AddLine(outer_border.Min, ImVec2(outer_border.Min.x, outer_border.Max.y), outer_col, border_size);
-            inner_drawlist->AddLine(ImVec2(outer_border.Max.x, outer_border.Min.y), outer_border.Max, outer_col, border_size);
+            for (int y = outer_border.Min.y; y < outer_border.Max.y; ++y) {
+                inner_drawlist->AddText(ImVec2(outer_border.Min.x, y), outer_col, "|");
+                inner_drawlist->AddText(ImVec2(outer_border.Max.x - 2.0f, y), outer_col, "|");
+            }
+            //inner_drawlist->AddLine(outer_border.Min, ImVec2(outer_border.Min.x, outer_border.Max.y), outer_col, border_size);
+            //inner_drawlist->AddLine(ImVec2(outer_border.Max.x, outer_border.Min.y), outer_border.Max, outer_col, border_size);
         }
-        else if (table->Flags & ImGuiTableFlags_BordersOuterH)
+        else if (table->Flags & ImGuiTableFlags_BordersOuterH && false)
         {
             inner_drawlist->AddLine(outer_border.Min, ImVec2(outer_border.Max.x, outer_border.Min.y), outer_col, border_size);
             inner_drawlist->AddLine(ImVec2(outer_border.Min.x, outer_border.Max.y), outer_border.Max, outer_col, border_size);
         }
     }
-    if ((table->Flags & ImGuiTableFlags_BordersInnerH) && table->RowPosY2 < table->OuterRect.Max.y)
+    if ((table->Flags & ImGuiTableFlags_BordersInnerH) && table->RowPosY2 < table->OuterRect.Max.y && false)
     {
         // Draw bottom-most row border
         const float border_y = table->RowPosY2;

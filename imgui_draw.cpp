@@ -3798,14 +3798,13 @@ void ImGui::RenderBullet(ImDrawList* draw_list, ImVec2 pos, ImU32 col)
     draw_list->AddText(ImVec2(pos.x - 0.5, pos.y - 0.5), col, "B");
 }
 
-void ImGui::RenderCheckMark(ImDrawList* draw_list, ImVec2 pos, ImU32 col, float sz)
+void ImGui::RenderCheckMark(ImDrawList* draw_list, ImVec2 pos, ImU32 col, float sz, const char * symbol)
 {
     float thickness = ImMax(sz / 5.0f, 1.0f);
 
     pos += ImVec2(thickness*0.25f, thickness*0.25f);
 
-    draw_list->AddText(ImVec2(pos.x - 0.5, pos.y - 0.5), col, "X");
-
+    draw_list->AddText(ImVec2(pos.x - 0.5, pos.y - 0.5), col, symbol);
 }
 
 // Render an arrow. 'pos' is position of the arrow tip. half_sz.x is length from base to tip. half_sz.y is length on each side.
