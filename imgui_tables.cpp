@@ -1836,7 +1836,7 @@ void ImGui::TableEndRow(ImGuiTable* table)
         // We soft/cpu clip this so all backgrounds and borders can share the same clipping rectangle
         if (bg_col0 || bg_col1)
         {
-            ImRect row_rect(table->WorkRect.Min.x, bg_y1, table->WorkRect.Max.x, bg_y2);
+            ImRect row_rect(table->WorkRect.Min.x + 1.0f, bg_y1, table->WorkRect.Max.x, bg_y2);
             row_rect.ClipWith(table->BgClipRect);
             if (bg_col0 != 0 && row_rect.Min.y < row_rect.Max.y)
                 window->DrawList->AddRectFilled(row_rect.Min, ImVec2(row_rect.Max.x, row_rect.Min.y), bg_col0);
@@ -1855,7 +1855,7 @@ void ImGui::TableEndRow(ImGuiTable* table)
                 const ImGuiTableColumn* column = &table->Columns[cell_data->Column];
                 ImRect cell_bg_rect = TableGetCellBgRect(table, cell_data->Column);
                 cell_bg_rect.ClipWith(table->BgClipRect);
-                cell_bg_rect.Min.x = ImMax(cell_bg_rect.Min.x, column->ClipRect.Min.x);     // So that first column after frozen one gets clipped when scrolling
+                cell_bg_rect.Min.x = ImMax(cell_bg_rect.Min.x, column->ClipRect.Min.x) + 1.0f;     // So that first column after frozen one gets clipped when scrolling
                 cell_bg_rect.Max.x = ImMin(cell_bg_rect.Max.x, column->MaxX);
                 window->DrawList->AddRectFilled(cell_bg_rect.Min, ImVec2(cell_bg_rect.Max.x, cell_bg_rect.Min.y), cell_data->BgColor);
             }
