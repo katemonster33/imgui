@@ -674,6 +674,7 @@ void    ImGui_ImplDX12_InvalidateDeviceObjects()
     ImGui_ImplDX12_Data* bd = ImGui_ImplDX12_GetBackendData();
     if (!bd || !bd->pd3dDevice)
         return;
+
     ImGuiIO& io = ImGui::GetIO();
 
     SafeRelease(bd->pRootSignature);

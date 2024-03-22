@@ -1016,9 +1016,22 @@ static void ShowDemoWindowWidgets()
         // - Consider using the lower-level ImDrawList::AddImage() API, via ImGui::GetWindowDrawList()->AddImage().
         // - Read https://github.com/ocornut/imgui/blob/master/docs/FAQ.md
         // - Read https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples
-        ImTextureID my_tex_id = io.Fonts->TexID;
-        float my_tex_w = (float)io.Fonts->TexWidth;
-        float my_tex_h = (float)io.Fonts->TexHeight;
+        int num_font_textures = io.Fonts->FontTextures.Size;
+        static int selected_font_texture = 0;
+        char buf[32];
+        bool sameline = false;
+        for (int i = 0; i < num_font_textures; ++i) {
+            if (sameline) ImGui::SameLine();
+            sprintf(buf, "%d##FontTextureButton%d", i, i);
+            if (ImGui::Button(buf, ImVec2(32.f, 32.f))) {
+                selected_font_texture = i;
+            }
+            sameline = true;
+        }
+
+        ImTextureID my_tex_id = io.Fonts->FontTextures[selected_font_texture]->TexID;
+        float my_tex_w = (float)io.Fonts->FontTextures[selected_font_texture]->TexWidth;
+        float my_tex_h = (float)io.Fonts->FontTextures[selected_font_texture]->TexHeight;
         {
             ImGui::Text("%.0fx%.0f", my_tex_w, my_tex_h);
             ImVec2 pos = ImGui::GetCursorScreenPos();
@@ -6182,6 +6195,7 @@ void ImGui::ShowStyleEditor(ImGuiStyle* ref)
             ImGuiIO& io = ImGui::GetIO();
             ImFontAtlas* atlas = io.Fonts;
             HelpMarker("Read FAQ and docs/FONTS.md for details on font loading.");
+            
             ImGui::ShowFontAtlas(atlas);
 
             // Post-baking font scaling. Note that this is NOT the nice way of scaling fonts, read below.
